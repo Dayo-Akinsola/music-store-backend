@@ -1,143 +1,81 @@
 const express = require('express');
 const app = express();
-const https = require('https');
 const dotenv = require('dotenv');
 const Cache = require('./cache');
-const cookieParser = require('cookie-parser');
-const cors = require('cors');
 const { Buffer } = require('buffer');
 dotenv.config();
 const TOKEN = process.env.TOKEN;
 const cache = new Cache(3600);
-const generateRandomString = require('./generateRandomString');
 
-const clientID = process.env.SPOTIFY_CLIENT_ID;
-const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
-const redirectURI =   'http://localhost:3001/callback';
+const client_id = process.env.SPOTIFY_CLIENT_ID;
+const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
 
-const stateKey = 'spotify_auth_state';
+/* Discogs endpoints */
 
-app.use(express.static(__dirname + '/public'))
-  .use(cors())
-  .use(cookieParser())
-
-
-app.get('/login', async (req, res) => {
-
-  const state = generateRandomString(16);
-  res.cookie(stateKey, state);
-
-  res.redirect('https://accounts.spotify.com/authorize?' +
-    new URLSearchParams({
-      response_type: 'code',
-      client_id: clientID,
-      redirect_uri: redirectURI,
-      state: state,
-  }).toString());
-});
-
-app.get('/callback', (req, res) => {
-
-  const code = req.query.code || null;
-  const storedState = req.cookies ? req.cookies[stateKey] : null;
-  console.log(req.query);
-
-  if (storedState === null) {
-    res.redirect('/#' +
-      new URLSearchParams({
-        error: 'state_mismatch'
-      }).toString());
-  } else {
-    res.clearCookie(stateKey);
-    const url = 'accounts.spotify.com';
-    const authOptions = {
-      hostname: url,
-      path: '/api/token',
-      form: {
-        code: code,
-        redirect_uri: redirectURI,
-        grant_type: 'authorization_code'
-      },
-      method: 'POST',
-      headers: {
-        'content-type': 'application/x-www-form-urlencoded',        
-        'Authorization': 'Basic ' + (Buffer.from(`${clientID}:${clientSecret}`).toString('base64')),
-      },
-      port: 3001,
-    };
-    
-    console.log(authOptions.headers.Authorization);
-    console.log(authOptions.form.code);
-
-    const request = https.request(authOptions, (response) => {
-      console.log(response.statusCode);
-      if (response.statusCode === 200){
-        console.log(response.body);
-        const access_token = response.body.access_token;
-        const refresh_token = response.body.refresh_token;
-
-        // const options = {
-        //   'content-type': 'application/json',          
-        //   url: 'https://api.spotify.con/v1/me',
-        //   headers: { 'Authorization': `Bearer ${access_token}` },
-        //   json: true,
-        //   method: 'GET'
-        // };
-
-        // const request2 = https.request(options, (response) => {
-        //   console.log(response.body);
-        // });
-
-        res.redirect('/#' + 
-          new URLSearchParams({
-            access_token,
-            refresh_token,
-          }).toString());
-        } 
-      else {
-        res.redirect('/#' +
-          new URLSearchParams({
-            error: 'invalid_token',
-          }).toString());
-      }
-    });
-
-    request.on('error', error => {
-      console.group(error);
-    });
-
-    //request.end();
-  }
-})
-
-app.get('/pop', async (req, res) => {
+app.get('/discogs/pop', async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  const requestUrl = `https://api.discogs.com/database/search?&format=album&style=pop&type=release&country=US&per_page=25&year=2021&token=${TOKEN}`;
-  const data = await cache.get(requestUrl);
+  const requestUrl = `https://api.discogs.com/database/search?&format=album&style=pop&type=release&country=US&per_page=75&year=2021&token=${TOKEN}`;
+  const data = await cache.get(requestUrl, null);
   res.json(data);
 });
 
-app.get('/hiphop', async (req, res) => {
+app.get('/discogs/hiphop', async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  const requestUrl = `https://api.discogs.com/database/search?&format=album&style=hip+hop&type=release&country=US&per_page=25&year=2021&token=${TOKEN}`;
-  const data = await cache.get(requestUrl);
+  const requestUrl = `https://api.discogs.com/database/search?&format=album&style=hip+hop&type=release&country=US&per_page=75&year=2021&token=${TOKEN}`;
+  const data = await cache.get(requestUrl, null);
   res.json(data);
 });
 
-app.get('/jazz', async (req, res) => {
+app.get('/discogs/jazz', async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  const requestUrl = `https://api.discogs.com/database/search?&format=album&style=jazz&type=release&country=US&per_page=25&year=2021&token=${TOKEN}`;
-  const data = await cache.get(requestUrl);
+  const requestUrl = `https://api.discogs.com/database/search?&format=album&style=jazz&type=release&country=US&per_page=75&year=2021&token=${TOKEN}`;
+  const data = await cache.get(requestUrl, null);
   res.json(data);
 });
 
-app.get('/:type/:id', async (req, res) => {
+app.get('/discogs/:type/:id', async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   const requestUrl = `https://api.discogs.com/${req.params.type}/${req.params.id}`;
-  const data = await cache.get(requestUrl);
+  const data = await cache.get(requestUrl, null);
   res.json(data);
 });
 
+/* Spotify endpoints */ 
+
+const authOptions = {
+  url: 'https://accounts.spotify.com/api/token',
+  headers: {
+    'Authorization': 'Basic ' + (new Buffer.from(
+      `${client_id}:${client_secret}`
+    ).toString('base64'))
+  },
+  params: {
+    grant_type: 'client_credentials',
+  },
+  method: 'post',
+};
+
+app.get('/spotify/:albumName', async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  const { access_token } = await cache.getAccessToken('access_token', authOptions);
+  const headers = {
+    'Authorization' : `Bearer ${access_token}`,
+  }
+  const requestUrl = `https://api.spotify.com/v1/search?q=album%3A${encodeURIComponent(req.params.albumName)}&type=album&market=ES&limit=50&offset=0`;
+  const data = await cache.get(requestUrl, headers);
+  res.json(data);
+});
+
+app.get('/spotify/:albumID/tracks', async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  const { access_token } = await cache.getAccessToken('access_token', authOptions);
+  const headers = {
+    'Authorization' : `Bearer ${access_token}`,
+  }
+  const requestUrl = `https://api.spotify.com/v1/albums/${req.params.albumID}/tracks?market=ES`;
+  const data = await cache.get(requestUrl, headers);
+  res.json(data);
+});
 
 const PORT = process.env.PORT || 3001;
 

@@ -6,7 +6,7 @@ class Cache {
     this.cache = new NodeCache( { stdTTL: ttl, checkperiod: ttl * 0.2 } )
   }
 
-  async get(requestUrl) {
+  async get(requestUrl, headers) {
     const cachedRequest = this.cache.get(requestUrl);
 
     if (cachedRequest) {
@@ -14,9 +14,23 @@ class Cache {
       return cachedData;
     }
 
-    const response = await axios.get(requestUrl);
+    const response = headers !== null ? await axios.get(requestUrl, {headers: headers}) : await axios.get(requestUrl);
     const data = response.data;
     this.cache.set(requestUrl, data);
+    return data;
+  }
+
+  async getAccessToken(request, options) {
+    const cachedRequest = this.cache.get(request);
+
+    if (cachedRequest) {
+      const cachedToken = await cachedRequest;
+      return cachedToken;
+    }
+
+    const response = await axios(options);
+    const data = response.data;
+    this.cache.set(request, data);
     return data;
   }
 
