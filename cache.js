@@ -16,6 +16,7 @@ class Cache {
 
     const response = headers !== null ? await axios.get(requestUrl, {headers: headers}) : await axios.get(requestUrl);
     const data = response.data;
+    console.log(data);
     this.cache.set(requestUrl, data);
     return data;
   }

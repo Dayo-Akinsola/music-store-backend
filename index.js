@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const dotenv = require('dotenv');
+const cookieParser = require('cookie-parser')
 const Cache = require('./cache');
 const { Buffer } = require('buffer');
 dotenv.config();
@@ -10,33 +11,55 @@ const cache = new Cache(3600);
 const client_id = process.env.SPOTIFY_CLIENT_ID;
 const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
 
+app.use(function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.header('Access-Control-Allow-Credentials', true);
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  cookieParser();
+  next();
+});
+
+
 /* Discogs endpoints */
 
 app.get('/discogs/pop', async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
   const requestUrl = `https://api.discogs.com/database/search?&format=album&style=pop&type=release&country=US&per_page=75&year=2021&token=${TOKEN}`;
-  const data = await cache.get(requestUrl, null);
+  const headers = {
+    withCrendentials: true,
+  }
+  const data = await cache.get(requestUrl, headers);
+  res.cookie(requestUrl, data, { sameSite: 'lax'});
   res.json(data);
 });
 
 app.get('/discogs/hiphop', async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
   const requestUrl = `https://api.discogs.com/database/search?&format=album&style=hip+hop&type=release&country=US&per_page=75&year=2021&token=${TOKEN}`;
-  const data = await cache.get(requestUrl, null);
+  const headers = {
+    withCrendentials: true,
+  }
+  const data = await cache.get(requestUrl, headers);
+  res.cookie(requestUrl, data, { sameSite: 'lax'});
   res.json(data);
 });
 
 app.get('/discogs/jazz', async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
   const requestUrl = `https://api.discogs.com/database/search?&format=album&style=jazz&type=release&country=US&per_page=75&year=2021&token=${TOKEN}`;
-  const data = await cache.get(requestUrl, null);
+  const headers = {
+    withCrendentials: true,
+  }
+  const data = await cache.get(requestUrl, headers);
+  res.cookie(requestUrl, data, { sameSite: 'lax'});
   res.json(data);
 });
 
 app.get('/discogs/:type/:id', async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
   const requestUrl = `https://api.discogs.com/${req.params.type}/${req.params.id}`;
-  const data = await cache.get(requestUrl, null);
+  const headers = {
+    withCrendentials: true,
+  }
+  const data = await cache.get(requestUrl, headers);
+  res.cookie(requestUrl, data, { sameSite: 'lax'});
   res.json(data);
 });
 
