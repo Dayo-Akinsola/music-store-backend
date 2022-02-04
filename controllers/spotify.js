@@ -21,17 +21,6 @@ const authOptions = {
   method: 'post',
 };
 
-spotifyRouter.get('/:albumName', async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  const { access_token } = await cache.getAccessToken('access_token', authOptions);
-  const headers = {
-      'Authorization' : `Bearer ${access_token}`,
-  }
-  const requestUrl = `https://api.spotify.com/v1/search?q=album%3A${encodeURIComponent(req.params.albumName)}&type=album&market=ES&limit=50&offset=0`;
-  const data = await cache.get(requestUrl, headers);
-  res.json(data);
-});
-
 spotifyRouter.get('/:albumID/tracks', async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   const { access_token } = await cache.getAccessToken('access_token', authOptions);
@@ -39,6 +28,17 @@ spotifyRouter.get('/:albumID/tracks', async (req, res) => {
       'Authorization' : `Bearer ${access_token}`,
   }
   const requestUrl = `https://api.spotify.com/v1/albums/${req.params.albumID}/tracks?market=ES`;
+  const data = await cache.get(requestUrl, headers);
+  res.json(data);
+});
+
+spotifyRouter.get('/:albumName', async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  const { access_token } = await cache.getAccessToken('access_token', authOptions);
+  const headers = {
+      'Authorization' : `Bearer ${access_token}`,
+  }
+  const requestUrl = `https://api.spotify.com/v1/search?q=album%3A${encodeURIComponent(req.params.albumName)}&type=album&market=ES&limit=50&offset=0`;
   const data = await cache.get(requestUrl, headers);
   res.json(data);
 });
