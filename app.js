@@ -1,12 +1,12 @@
 const { dbUrl } = require('./utils/config');
 const express = require('express');
 const app = express();
-const cookieParser = require('cookie-parser');
 const discogsRouter = require('./controllers/discogs');
 const spotifyRouter = require('./controllers/spotify');
 const usersRouter = require('./controllers/users');
 const ordersRouter = require('./controllers/orders');
 const mongoose = require('mongoose');
+const cors = require('cors');
 
 mongoose.connect(dbUrl, { useNewUrlParser: true, useUnifiedTopology: true, })
   .then(() => {
@@ -17,14 +17,7 @@ mongoose.connect(dbUrl, { useNewUrlParser: true, useUnifiedTopology: true, })
   });
 
 
-app.use( async (req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
-  res.header('Access-Control-Allow-Credentials', true);
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  cookieParser();
-  next();
-});
-
+app.use(cors());
 app.use(express.json());
 
 app.use('/discogs', discogsRouter);
