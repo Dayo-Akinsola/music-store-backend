@@ -13,7 +13,6 @@ const orderSchema = mongoose.Schema({
   orderDate: String, 
   deliveryAddress: String,
   albums: [albumSchema],
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 });
 
 albumSchema.set('toJSon', {

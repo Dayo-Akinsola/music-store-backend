@@ -50,7 +50,6 @@ const OrderHelpers = (() => {
           cover_image: 'picture_url2'
         },
       ],
-      user: null,
     },
     {
       orderDate: '05/02/2022',
@@ -69,13 +68,12 @@ const OrderHelpers = (() => {
           cover_image: 'picture_url4'
         },
       ],
-      user: null,
     } 
   ];
 
   const saveInitialOrders = async () => {
-    await Note.deleteMany({});
-    await Note.insertMany(_initialOrders);
+    await Order.deleteMany({});
+    await Order.insertMany(_initialOrders);
   }
 
   const ordersInDb = async () => {
