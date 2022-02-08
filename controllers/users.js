@@ -17,6 +17,11 @@ usersRouter.post('/register', async (req, res, next) => {
     cart: [],
   });
 
+  const uniqueUsernameCheck = await User.findOne({username: body.username});
+  if (uniqueUsernameCheck) {
+    return res.status(400).json({error: 'Username already exists'});
+  }
+
   try{
     const savedUser = await user.save();
     res.json(savedUser);
@@ -44,6 +49,33 @@ usersRouter.post('/login', async (req, res) => {
 
   res.status(200).send({token, username: loggedInUser.username, name: loggedInUser.name});
 });
+
+usersRouter.get('/details', async (req, res) => {
+  const token = getToken(req);
+  const loggedInUser = await getLoggedInUser(token);
+  res.json(loggedInUser.details);
+});
+
+usersRouter.put('/details', async (req, res) => {
+  const { body } = req;
+  
+  const userDetails = {
+    firstName: body.firstName,
+    lastName: body.lastName,
+    city: body.city,
+    address: body.address,
+    postCode: body.postCode,
+    phone: body.phone,
+    email: body.email,
+  }
+
+  const token = getToken(req);
+  const loggedInUser = await getLoggedInUser(token);
+  loggedInUser.details = userDetails;
+  await loggedInUser.save();
+  res.json();
+})
+
 
 usersRouter.get('/cart', async (req, res) => {
   const token = getToken(req);
@@ -84,7 +116,6 @@ usersRouter.put('/cart', async (req, res) => {
 });
 
 usersRouter.delete('/cart', async (req, res) => {
-  console.log('hello');
   const id = req.body.id;
   const token = getToken(req);
   const loggedInUser = await getLoggedInUser(token);
@@ -93,6 +124,14 @@ usersRouter.delete('/cart', async (req, res) => {
   await loggedInUser.save();
   res.json(loggedInUser.cart);
 });
+
+usersRouter.delete('/cart/clear', async (req, res) => {
+  const token = getToken(req);
+  const loggedInUser = await getLoggedInUser(token);
+  loggedInUser.cart = [];
+  await loggedInUser.save();
+  return res.status(204).json();
+})
 
 module.exports = usersRouter;
 
