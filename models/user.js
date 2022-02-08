@@ -1,7 +1,6 @@
 const dotenv = require('dotenv');
 dotenv.config();
 const mongoose = require('mongoose');
-const uniqueValidator = require('mongoose-unique-validator');
 
 const albumSchema = new mongoose.Schema({
   id: Number,
@@ -12,12 +11,22 @@ const albumSchema = new mongoose.Schema({
 });
 
 const userSchema = new mongoose.Schema({
-  username: { type: String, unique: true, required: true, minLength: 5, },
+  username: { type: String, required: true, minLength: 5, },
   name: { type: String, required: true },
   passwordHash: String,
   orders: [ {type: mongoose.Schema.Types.ObjectId, ref: 'Order'} ],
   cart: [albumSchema],
+  details: {
+    firstName: {type: String, default: ''},
+    lastName: {type: String, default: ''},
+    city: {type: String, default: ''},
+    address: {type: String, default: ''},
+    postCode: {type: String, default: ''},
+    phone: {type: String, default: ''},
+    email: {type: String, default: ''},
+  },
 });
+
 
 userSchema.set('toJSON', {
   transform: (document, returnedObject) => {
@@ -27,9 +36,6 @@ userSchema.set('toJSON', {
     delete returnedObject.passwordHash;
   }
 });
-
-userSchema.plugin(uniqueValidator);
-
 
 const User = mongoose.model('User', userSchema);
 
