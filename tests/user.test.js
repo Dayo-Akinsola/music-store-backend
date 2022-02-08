@@ -39,7 +39,7 @@ describe('tests for user creation', () => {
       .send(newUser)
       .expect(400)
     
-    expect(result.body.error).toContain('`username` to be unique');
+    expect(result.body.error).toContain('Username already exists');
 
     const allUsers = await UserHelpers.usersInDb();
     expect(allUsers).toHaveLength(1);
@@ -136,6 +136,7 @@ describe('tests for guest making an order', () => {
       .expect(200)
     
     const allOrders = await OrderHelpers.ordersInDb();
+    console.log(allOrders);
     expect(allOrders).toHaveLength(3);
   });
 });
@@ -184,7 +185,7 @@ describe('tests for logged in user making an order', () => {
   });
 });
 
-describe('tests for a user adding albums to their cart', () => {
+describe('tests for a user controlling their cart', () => {
 
   beforeEach(async() => {
     await User.deleteMany({});
@@ -214,8 +215,8 @@ describe('tests for a user adding albums to their cart', () => {
   });
   
   test("album already in the user's cart should have its quantity updated", async () => {
-    const user = await UserHelpers.createInitialUser('John', 'JD123', 'rabbit');
-    const loggedInUser = await api.post('/users/login').send({ username: user.username, password: 'rabbit'});
+    const user = await UserHelpers.createInitialUser('John', 'JD123', 'rabbit77');
+    const loggedInUser = await api.post('/users/login').send({ username: user.username, password: 'rabbit77'});
     const token = loggedInUser.body.token;
 
     const newCartAlbum = {
@@ -231,7 +232,7 @@ describe('tests for a user adding albums to their cart', () => {
       .set('authorization', `bearer ${token}`)
       .send(newCartAlbum)
     
-    await api
+      await api
       .put('/users/cart')
       .set('authorization', `bearer ${token}`)
       .send(newCartAlbum)
@@ -241,6 +242,48 @@ describe('tests for a user adding albums to their cart', () => {
     expect(updatedUser.cart).toHaveLength(1);
     expect(updatedUser.cart[0].quantity).toBe(6);
     });
+
+    test("all a user's albums should be removed from their cart", async () => {
+      const user = await UserHelpers.createInitialUser('Jane', 'JA123', 'gecko111');
+      const loggedInUser = await api.post('/users/login').send({ username: user.username, password: 'gecko111'});
+      const token = loggedInUser.body.token;
+
+      const newCartAlbumOne = {
+        title: 'Cart Album',
+        price: 23.44,
+        thumb: 'album_picture',
+        id: 12334,
+        quantity: 3,
+      }
+
+      const newCartAlbumTwo = {
+        title: 'Cart Album 2',
+        price: 21.44,
+        thumb: 'album_picture2',
+        id: 12335,
+        quantity: 2,
+      }
+
+      await api
+      .put('/users/cart')
+      .set('authorization', `bearer ${token}`)
+      .send(newCartAlbumOne)
+      .expect(200)  
+
+      await api
+      .put('/users/cart')
+      .set('authorization', `bearer ${token}`)
+      .send(newCartAlbumTwo)
+      .expect(200)  
+
+      await api
+        .delete('/users/cart/clear')
+        .set('authorization', `bearer ${token}`)
+        .expect(204);
+      
+      const updatedUser = await User.findById(user.id);
+      expect(updatedUser.cart).toHaveLength(0);
+    })
 })
 
 afterAll(() => {
