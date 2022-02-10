@@ -10,7 +10,7 @@ const UserHelpers = (() => {
     return users.map(user => user.toJSON());
   }
 
-  const createInitialUser = async (name, username, password) => {
+  const createUser = async (name, username, password) => {
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
@@ -26,7 +26,7 @@ const UserHelpers = (() => {
 
   return {
     usersInDb,
-    createInitialUser,
+    createUser,
   }
 })();
 
@@ -87,4 +87,25 @@ const OrderHelpers = (() => {
   }
  })();
 
-module.exports = { UserHelpers, OrderHelpers}
+ const ReviewHelpers = (() => {
+  const generateReview = (albumId, user) => {
+    const review = {
+      albumId,
+      user,
+      rating: 5,
+      headline: 'Great Album',
+      reviewText: '10/10 would buy again.',
+      date: '23 March 2022',
+      upvotes: 0,
+      downvotes: 0,
+      _id: 'krkremrk123',
+    }
+    return review;
+  }
+
+  return {
+    generateReview,
+  }
+ })();
+
+module.exports = { UserHelpers, OrderHelpers, ReviewHelpers }

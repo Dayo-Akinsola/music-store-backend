@@ -1,5 +1,3 @@
-const dotenv = require('dotenv');
-dotenv.config();
 const mongoose = require('mongoose');
 
 const albumSchema = new mongoose.Schema({
@@ -8,6 +6,11 @@ const albumSchema = new mongoose.Schema({
   quantity: Number,
   thumb: String,
   title: String,
+});
+
+const votedReviewsSchema = new mongoose.Schema({
+  review: { type: mongoose.Schema.Types.ObjectId, ref: 'Review'},
+  vote: Boolean,
 });
 
 const userSchema = new mongoose.Schema({
@@ -25,6 +28,8 @@ const userSchema = new mongoose.Schema({
     phone: {type: String, default: ''},
     email: {type: String, default: ''},
   },
+  reviews: [ {type: mongoose.Schema.Types.ObjectId, ref: 'Review'} ],
+  votedReviews: [votedReviewsSchema],
 });
 
 

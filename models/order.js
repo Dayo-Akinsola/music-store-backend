@@ -1,5 +1,3 @@
-const dotenv = require('dotenv');
-dotenv.config();
 const mongoose = require('mongoose');
 
 const albumSchema = new mongoose.Schema({
