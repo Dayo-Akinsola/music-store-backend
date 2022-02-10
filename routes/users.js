@@ -50,15 +50,14 @@ usersRouter.post('/login', async (req, res) => {
   res.status(200).send({token, username: loggedInUser.username, name: loggedInUser.name});
 });
 
-usersRouter.get('/details', async (req, res) => {
+usersRouter.get('/details', async (req, res, next) => {
   const token = getToken(req);
-  const loggedInUser = await getLoggedInUser(token);
+  const loggedInUser = await getLoggedInUser(token, next);
   res.json(loggedInUser.details);
 });
 
 usersRouter.put('/details', async (req, res) => {
   const { body } = req;
-  
   const userDetails = {
     firstName: body.firstName,
     lastName: body.lastName,
@@ -70,20 +69,20 @@ usersRouter.put('/details', async (req, res) => {
   }
 
   const token = getToken(req);
-  const loggedInUser = await getLoggedInUser(token);
+  const loggedInUser = await getLoggedInUser(token, next);
   loggedInUser.details = userDetails;
   await loggedInUser.save();
   res.json();
 })
 
 
-usersRouter.get('/cart', async (req, res) => {
+usersRouter.get('/cart', async (req, res, next) => {
   const token = getToken(req);
-  const loggedInUser = await getLoggedInUser(token);
+  const loggedInUser = await getLoggedInUser(token, next);
   res.json(loggedInUser.cart);
 });
 
-usersRouter.put('/cart', async (req, res) => {
+usersRouter.put('/cart', async (req, res, next) => {
   const { body } = req;
 
   const albumData = {
@@ -95,7 +94,7 @@ usersRouter.put('/cart', async (req, res) => {
   }
 
   const token = getToken(req);
-  const loggedInUser = await getLoggedInUser(token);
+  const loggedInUser = await getLoggedInUser(token, next);
   let albumIndex;
   const matchingAlbum = loggedInUser.cart.filter((album, index) => {
     if (album.id === body.id) {
@@ -115,19 +114,19 @@ usersRouter.put('/cart', async (req, res) => {
   res.json(loggedInUser.cart);
 });
 
-usersRouter.delete('/cart', async (req, res) => {
+usersRouter.delete('/cart', async (req, res, next) => {
   const id = req.body.id;
   const token = getToken(req);
-  const loggedInUser = await getLoggedInUser(token);
+  const loggedInUser = await getLoggedInUser(token, next);
   const albumToDeleteIndex = loggedInUser.cart.findIndex(album => album.id === id);
   loggedInUser.cart.splice(albumToDeleteIndex, 1);
   await loggedInUser.save();
   res.json(loggedInUser.cart);
 });
 
-usersRouter.delete('/cart/clear', async (req, res) => {
+usersRouter.delete('/cart/clear', async (req, res, next) => {
   const token = getToken(req);
-  const loggedInUser = await getLoggedInUser(token);
+  const loggedInUser = await getLoggedInUser(token, next);
   loggedInUser.cart = [];
   await loggedInUser.save();
   return res.status(204).json();

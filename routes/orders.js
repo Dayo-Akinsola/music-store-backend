@@ -1,6 +1,4 @@
 const ordersRouter = require('express').Router();
-const dotenv = require('dotenv');
-dotenv.config();
 const Order = require('../models/order');
 const { getToken, getLoggedInUser } = require('../helpers/serviceHelpers');
 

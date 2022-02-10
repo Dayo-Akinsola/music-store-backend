@@ -1,13 +1,11 @@
 const reviewsRouter = require('express').Router();
 const dotenv = require('dotenv');
 dotenv.config();
-const jwt = require('jsonwebtoken');
 const Review = require('../models/review');
 const { getToken, getLoggedInUser } = require('../helpers/serviceHelpers');
 
 reviewsRouter.post('/', async (req, res) => {
   const { body } = req;
-
   const token = getToken(req);
 
   if (token) {
@@ -46,27 +44,25 @@ reviewsRouter.get('/:albumId', async (req, res) => {
 
 reviewsRouter.put('/vote', async (req, res) => {
   const { body } = req;
-  const review = await Review.findOne({});
+  const review = await Review.findOne({ _id: body.reviewId});
   const token = getToken(req);
 
   if (token) {
     const loggedInUser = await getLoggedInUser(token);
     let matchIndex;
     const reviewIdMatch = loggedInUser.votedReviews.filter((review, index) => {
-      if (review.id === body.id) {
+      if (review.reviewId.toString() === body.reviewId) {
         matchIndex = index;
         return true;
       }
     });
-
     if (reviewIdMatch.length !== 0) {
       if (reviewIdMatch[0].vote === body.vote) {
         loggedInUser.votedReviews.splice(matchIndex, 1);
         (body.vote) ? review.upvotes -= 1 : review.downvotes -= 1;
 
       } else {
-        let voteToChange = loggedInUser.votedReviews[matchIndex];
-        voteToChange = !voteToChange;
+        loggedInUser.votedReviews[matchIndex].vote = !loggedInUser.votedReviews[matchIndex].vote;
         (body.vote) ? (review.downvotes -= 1, review.upvotes += 1) : (review.downvotes += 1, review.upvotes -= 1);
       }
     } else {
@@ -75,7 +71,7 @@ reviewsRouter.put('/vote', async (req, res) => {
     }
     await review.save();
     await loggedInUser.save();
-    res.json();
+    res.json(review);
   } else {
     return res.status(400).json({ error: 'You must be logged in to vote.'});
   }
