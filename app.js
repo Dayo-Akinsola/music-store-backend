@@ -5,6 +5,7 @@ const discogsRouter = require('./controllers/discogs');
 const spotifyRouter = require('./controllers/spotify');
 const usersRouter = require('./controllers/users');
 const ordersRouter = require('./controllers/orders');
+const reviewsRouter = require('./controllers/reviews');
 const mongoose = require('mongoose');
 const cors = require('cors');
 
@@ -24,6 +25,7 @@ app.use('/discogs', discogsRouter);
 app.use('/spotify', spotifyRouter);
 app.use('/users', usersRouter);
 app.use('/orders', ordersRouter);
+app.use('/reviews', reviewsRouter);
 
 const middleware = require('./utils/middleware');
 
