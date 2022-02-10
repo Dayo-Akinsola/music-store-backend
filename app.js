@@ -1,11 +1,13 @@
 const { dbUrl } = require('./utils/config');
 const express = require('express');
 const app = express();
-const discogsRouter = require('./controllers/discogs');
-const spotifyRouter = require('./controllers/spotify');
-const usersRouter = require('./controllers/users');
-const ordersRouter = require('./controllers/orders');
-const reviewsRouter = require('./controllers/reviews');
+const discogsRouter = require('./routes/discogs');
+const spotifyRouter = require('./routes/spotify');
+const usersRouter = require('./routes/users');
+const ordersRouter = require('./routes/orders');
+const reviewsRouter = require('./routes/reviews');
+const wishlistRouter = require('./routes/wishlist');
+const friendsRouter = require('./routes/friends');
 const mongoose = require('mongoose');
 const cors = require('cors');
 
@@ -26,6 +28,8 @@ app.use('/spotify', spotifyRouter);
 app.use('/users', usersRouter);
 app.use('/orders', ordersRouter);
 app.use('/reviews', reviewsRouter);
+app.use('/wishlist', wishlistRouter);
+app.use('/friends', friendsRouter);
 
 const middleware = require('./utils/middleware');
 

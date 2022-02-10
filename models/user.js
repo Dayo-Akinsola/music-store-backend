@@ -8,9 +8,17 @@ const albumSchema = new mongoose.Schema({
   title: String,
 });
 
-const votedReviewsSchema = new mongoose.Schema({
-  review: { type: mongoose.Schema.Types.ObjectId, ref: 'Review'},
+const votedReviewSchema = new mongoose.Schema({
   vote: Boolean,
+  reviewId: { type: mongoose.Schema.Types.ObjectId, ref: 'Review'}
+});
+
+const wishlistAlbumSchema = new mongoose.Schema({
+  albumId: Number,
+  title: String,
+  thumb: String,
+  price: Number,
+  dataAdded: String,
 });
 
 const userSchema = new mongoose.Schema({
@@ -29,9 +37,19 @@ const userSchema = new mongoose.Schema({
     email: {type: String, default: ''},
   },
   reviews: [ {type: mongoose.Schema.Types.ObjectId, ref: 'Review'} ],
-  votedReviews: [votedReviewsSchema],
+  votedReviews: [votedReviewSchema],
+  wishlist: [wishlistAlbumSchema],
+  friends: [ {type: mongoose.Schema.Types.ObjectId, ref: 'User'} ],
+  sentRequests: [ {type: mongoose.Schema.Types.ObjectId, ref: 'User'} ],
+  receivedRequests: [ {type: mongoose.Schema.Types.ObjectId, ref: 'User'} ],
 });
 
+votedReviewSchema.set('toJSON',  {
+  transform: (document, returnedObject) => {
+    delete returnedObject._id;
+    delete returnedObject.__v;
+  }
+})
 
 userSchema.set('toJSON', {
   transform: (document, returnedObject) => {
