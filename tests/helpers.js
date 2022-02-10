@@ -1,5 +1,6 @@
 const User = require('../models/user');
 const Order = require('../models/order');
+const Review = require('../models/review');
 const bcrypt = require('bcrypt');
 
 
@@ -88,8 +89,8 @@ const OrderHelpers = (() => {
  })();
 
  const ReviewHelpers = (() => {
-  const generateReview = (albumId, user) => {
-    const review = {
+  const generateReview = async (albumId, user) => {
+    const review = new Review({
       albumId,
       user,
       rating: 5,
@@ -98,8 +99,9 @@ const OrderHelpers = (() => {
       date: '23 March 2022',
       upvotes: 0,
       downvotes: 0,
-      _id: 'krkremrk123',
-    }
+    });
+
+    await review.save();
     return review;
   }
 
@@ -108,4 +110,23 @@ const OrderHelpers = (() => {
   }
  })();
 
-module.exports = { UserHelpers, OrderHelpers, ReviewHelpers }
+ const WishlistHelpers = (() => {
+
+  const createWishlistAlbum = async (albumId) => {
+    const album = {
+      albumId,
+      title: 'new album',
+      thumb: 'new album image',
+      price: 11.99,
+      dateAdded: '10 March 2022',
+    }
+
+    return album;
+  }
+
+  return {
+    createWishlistAlbum,
+  }
+})();
+
+module.exports = { UserHelpers, OrderHelpers, ReviewHelpers, WishlistHelpers }

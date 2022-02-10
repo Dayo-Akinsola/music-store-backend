@@ -13,7 +13,6 @@ const reviewSchema = new mongoose.Schema({
 
 reviewSchema.set('toJSON', {
   transform: (document, returnedObject) => {
-    delete returnedObject._id;
     delete returnedObject.__v;
   }
 });
