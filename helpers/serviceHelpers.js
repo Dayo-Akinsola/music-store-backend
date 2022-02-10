@@ -1,3 +1,4 @@
+const { JsonWebTokenError } = require('jsonwebtoken');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
@@ -9,13 +10,17 @@ const getToken = (req) => {
   return null
 }
 
-const getLoggedInUser = async (token) => {
-  const decodedToken = jwt.verify(token, process.env.SECRET);
-  if (!decodedToken.id) {
-    return res.status(401).json({ error: 'token invalid or missing'});
+const getLoggedInUser = async (token, next) => {
+  try {
+    const decodedToken = jwt.verify(token, process.env.SECRET);
+    if (!decodedToken.id) {
+      throw new JsonWebTokenError("Invalid or missing Token");  
+    }
+    const loggedInUser = await User.findById(decodedToken.id);
+    return loggedInUser;
+  } catch(exception) {
+    next(exception);
   }
-  const loggedInUser = await User.findById(decodedToken.id);
-  return loggedInUser;
 }
 
 module.exports = { getToken, getLoggedInUser };
