@@ -16,7 +16,7 @@ const getLoggedInUser = async (token, next) => {
     if (!decodedToken.id) {
       throw new JsonWebTokenError("Invalid or missing Token");  
     }
-    const loggedInUser = await User.findById(decodedToken.id);
+    const loggedInUser = await User.findById(decodedToken.id).populate({ path: 'sentRequests receivedRequests friends', select:'name username'});
     return loggedInUser;
   } catch(exception) {
     next(exception);
