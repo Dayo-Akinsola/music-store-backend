@@ -33,6 +33,121 @@ describe('tests for sending a friend request', () => {
     expect(user.sentRequests).toHaveLength(1);
     expect(friend.receivedRequests).toHaveLength(1);
   });
+
+  test('user friend request should fail if the name and username do not match a user', async () => {
+    const userLogin = await api.post('/users/login').send({ username: 'JD123', password: 'rabbit77'});
+    const token = userLogin.body.token;
+
+    const wrongNameRequest = {
+      name: 'Johnny',
+      username: 'WE123',
+    }
+
+    const wrongUserNameRequest= {
+      name: 'Wale',
+      username: 'New1234',
+    }
+
+    await api
+      .post('/friends/request')
+      .set('authorization', `bearer ${token}`)
+      .send(wrongNameRequest)
+      .expect(400)
+    
+    await api
+    .post('/friends/request')
+    .set('authorization', `bearer ${token}`)
+    .send(wrongUserNameRequest)
+    .expect(400)  
+  });
+
+  test('duplicate request should not be sent', async () => {
+    const userLogin = await api.post('/users/login').send({ username: 'JD123', password: 'rabbit77'});
+    const token = userLogin.body.token;
+
+    const friendRequest = {
+      name: 'Wale',
+      username: 'WE123',
+    }
+
+    const dupeRequest = {
+      name: 'Wale',
+      username: 'WE123',
+    }
+
+    await api
+      .post('/friends/request')
+      .set('authorization', `bearer ${token}`)
+      .send(friendRequest)
+    
+    await api 
+      .post('/friends/request')
+      .set('authorization', `bearer ${token}`)
+      .send(dupeRequest)
+      .expect(400)
+  });
+
+  test('user should be able to accept a friend request', async () => {
+    const userLogin = await api.post('/users/login').send({ username: 'JD123', password: 'rabbit77'});
+    const token = userLogin.body.token;
+
+    const friendRequest = {
+      name: 'Wale',
+      username: 'WE123',
+    }
+
+    await api
+      .post('/friends/request')
+      .set('authorization', `bearer ${token}`)
+      .send(friendRequest)
+  
+    const friendLogin = await api.post('/users/login').send({ username: 'WE123', password: 'horse887'});
+    const friendToken = friendLogin.body.token;
+
+    await api
+      .post('/friends/request/response')
+      .set('authorization', `bearer ${friendToken}`)
+      .send({ name: userLogin.body.name, username: userLogin.body.username, accept: true })
+      .expect(200)
+    
+    const sender = await User.findOne({ username: userLogin.body.username, name: userLogin.body.name });
+    const receiver = await User.findOne({ username: friendLogin.body.username, name: friendLogin.body.name });
+    expect(sender.friends).toHaveLength(1);
+    expect(receiver.friends).toHaveLength(1);
+    expect(sender.sentRequests).toHaveLength(0);
+    expect(receiver.receivedRequests).toHaveLength(0);
+    });
+
+    test('user should be able to decline a friend request', async () => {
+      const userLogin = await api.post('/users/login').send({ username: 'JD123', password: 'rabbit77'});
+      const token = userLogin.body.token;
+  
+      const friendRequest = {
+        name: 'Wale',
+        username: 'WE123',
+      }
+
+      await api
+      .post('/friends/request')
+      .set('authorization', `bearer ${token}`)
+      .send(friendRequest)
+
+      const friendLogin = await api.post('/users/login').send({ username: 'WE123', password: 'horse887'});
+      const friendToken = friendLogin.body.token;
+
+      await api
+        .post('/friends/request/response')
+        .set('authorization', `bearer ${friendToken}`)
+        .send({ name: userLogin.body.name, username: userLogin.body.username, accept: false })
+        .expect(200)
+      
+        const sender = await User.findOne({ username: userLogin.body.username, name: userLogin.body.name });
+        const receiver = await User.findOne({ username: friendLogin.body.username, name: friendLogin.body.name });
+        expect(sender.friends).toHaveLength(0);
+        expect(receiver.friends).toHaveLength(0);
+        expect(sender.sentRequests).toHaveLength(0);
+        expect(receiver.receivedRequests).toHaveLength(0);
+    });
 })
 
 
