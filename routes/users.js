@@ -5,7 +5,7 @@ usersRouter.post('/register', (req, res, next) => UserControllers.registerUser(r
 
 usersRouter.post('/login', (req, res) => UserControllers.loginUser(req, res))
 
-usersRouter.get('/details', (req, res) => UserControllers.getUserDetails(req, res, next));
+usersRouter.get('/details', (req, res) => UserControllers.getUserDetails(req, res));
 
 usersRouter.put('/details', (req, res) => UserControllers.updateUserDetails(req, res));
 

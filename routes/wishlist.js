@@ -1,10 +1,14 @@
 const wishlistRouter = require('express').Router();
 const WishlistControllers = require('../controllers/wishlistControllers');
 
-wishlistRouter.get('/', (req, res, next) => WishlistControllers.getUserWishlist(req, res, next));
+wishlistRouter.get('/', (req, res) => WishlistControllers.getUserWishlist(req, res));
 
-wishlistRouter.post('/', (req, res, next) => WishlistControllers.addAlbumToWishlist(req, res, next));
+wishlistRouter.post('/', (req, res) => WishlistControllers.addAlbumToWishlist(req, res));
 
-wishlistRouter.delete('/', (req, res, next) => WishlistControllers.removeAlbumFromWishlist(req, res, next));
+wishlistRouter.delete('/', (req, res) => WishlistControllers.removeAlbumFromWishlist(req, res));
+
+wishlistRouter.put('/', (req, res) => WishlistControllers.updateWishlistAlbumComment(req, res));
+
+wishlistRouter.get('/:id', (req, res) => WishlistControllers.getWishlistAlbum(req, res));
 
 module.exports = wishlistRouter;
