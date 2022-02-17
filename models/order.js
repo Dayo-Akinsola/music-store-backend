@@ -9,8 +9,9 @@ const albumSchema = new mongoose.Schema({
 });
 
 const orderSchema = mongoose.Schema({
-  orderDate: String, 
+  orderDate: Number, 
   deliveryAddress: String,
+  deliveryPostCode: String,
   albums: [albumSchema],
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 });
