@@ -7,6 +7,12 @@ const { getToken, getLoggedInUser } = require('../helpers/serviceHelpers');
 
 const UserControllers = (() => {
 
+  const _logInUser = async (req) => {
+    const token = getToken(req);
+    const loggedInUser = await getLoggedInUser(token);
+    return loggedInUser;
+  }
+
   const registerUser = async (req, res, next) => {
     const { body } = req;
     const saltRounds = 10;
@@ -53,10 +59,13 @@ const UserControllers = (() => {
     res.status(200).send({token, username: loggedInUser.username, name: loggedInUser.name});
   }
 
-  const getUserDetails = async (req, res, next) => {
-    const token = getToken(req);
-    const loggedInUser = await getLoggedInUser(token, next);
-    res.json(loggedInUser.details);
+  const getUserDetails = async (req, res) => {
+    const loggedInUser = await _logInUser(req);
+    if (loggedInUser) {
+      res.json(loggedInUser.details);
+    } else {
+      res.send(null);
+    }
   }
 
   const updateUserDetails = async (req, res) => {
@@ -71,16 +80,14 @@ const UserControllers = (() => {
       email: body.email,
     }
   
-    const token = getToken(req);
-    const loggedInUser = await getLoggedInUser(token, next);
+    const loggedInUser = await _logInUser(req);
     loggedInUser.details = userDetails;
     await loggedInUser.save();
     res.json();
   }
 
   const getCartAlbums = async (req, res, next) => {
-    const token = getToken(req);
-    const loggedInUser = await getLoggedInUser(token, next);
+    const loggedInUser =  await _logInUser(req);
     res.json(loggedInUser.cart);
   }
 
@@ -95,8 +102,7 @@ const UserControllers = (() => {
       quantity: body.quantity,
     }
   
-    const token = getToken(req);
-    const loggedInUser = await getLoggedInUser(token, next);
+    const loggedInUser = await _logInUser(req);
     let albumIndex;
     const matchingAlbum = loggedInUser.cart.filter((album, index) => {
       if (album.id === body.id) {
@@ -118,8 +124,7 @@ const UserControllers = (() => {
 
   const deleteCartAlbum = async (req, res, next) => {
     const id = req.body.id;
-    const token = getToken(req);
-    const loggedInUser = await getLoggedInUser(token, next);
+    const loggedInUser = await _logInUser(req);
     const albumToDeleteIndex = loggedInUser.cart.findIndex(album => album.id === id);
     loggedInUser.cart.splice(albumToDeleteIndex, 1);
     await loggedInUser.save();
@@ -127,8 +132,7 @@ const UserControllers = (() => {
   }
 
   const clearCart = async (req, res, next) => {
-    const token = getToken(req);
-    const loggedInUser = await getLoggedInUser(token, next);
+    const loggedInUser = await _logInUser(req);
     loggedInUser.cart = [];
     await loggedInUser.save();
     return res.status(204).json();

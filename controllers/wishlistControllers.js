@@ -1,37 +1,33 @@
-const { getToken, getLoggedInUser } = require('../helpers/serviceHelpers');
+const logInUser = require('./controllerHelper');
 
 const WishlistControllers = (() => {
 
-  const getUserWishlist = async (req, res, next) => {
-    const token = getToken(req);
-    const loggedInUser = await getLoggedInUser(token, next);
+  const getUserWishlist = async (req, res) => {
+    const loggedInUser = await logInUser(req);
     if (loggedInUser) {
       res.json(loggedInUser.wishlist);
     } 
-    next();
   }
 
-  const addAlbumToWishlist = async (req, res, next) => {
+  const addAlbumToWishlist = async (req, res) => {
     const { body } = req;
-    const token = getToken(req);
-    const loggedInUser = await getLoggedInUser(token, next);
+    const loggedInUser = await logInUser(req);
   
     if (loggedInUser) {
-      const dupeAlbumCheck = loggedInUser.wishlist.filter(albumId => albumId === body.albumId);
+      const dupeAlbumCheck = loggedInUser.wishlist.filter(album => album.albumId === body.albumId);
       if (dupeAlbumCheck.length !== 0){
         return res.status(400).json({error: `${body.title} is already in your wishlist.`});
       }
       loggedInUser.wishlist.push(body);
       await loggedInUser.save();
-      res.json(loggedInUser.wishlist);
+      res.end();
     }
-    next();
   }
 
-  const removeAlbumFromWishlist = async (req, res, next) => {
+  const removeAlbumFromWishlist = async (req, res) => {
     const { body } = req
-    const token = getToken(req);
-    const loggedInUser = await getLoggedInUser(token, next);
+    const loggedInUser = await logInUser(req);
+
     if (loggedInUser) {
       loggedInUser.wishlist.forEach((album, index) => {
         if (album.albumId === body.albumId) {
@@ -39,15 +35,42 @@ const WishlistControllers = (() => {
         }
       });
       await loggedInUser.save();
-      res.json(loggedInUser.wishlist)
+      res.end();
     }
-    next();
+  }
+
+  const updateWishlistAlbumComment = async (req, res) => {
+    const { body } = req;
+    const loggedInUser = await logInUser(req);
+
+    if (loggedInUser) {
+      const { wishlist } = loggedInUser;
+      wishlist.forEach(album => {
+        if (album.albumId === body.albumId) {
+          album.comment = body.comment;
+        }
+      });
+      await loggedInUser.save();
+    }
+    res.end();
+  }
+
+  const getWishlistAlbum = async (req, res) => {
+    const loggedInUser = await logInUser(req);
+
+    if (loggedInUser) {
+      const { wishlist } = loggedInUser;
+      const wishlistAlbum = wishlist.filter(album => album._id.toString() === req.params.id);
+      res.json(wishlistAlbum[0]);
+    }
   }
 
   return {
     getUserWishlist,
     addAlbumToWishlist,
     removeAlbumFromWishlist,
+    updateWishlistAlbumComment,
+    getWishlistAlbum,
   }
 
 })();
