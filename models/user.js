@@ -18,7 +18,10 @@ const wishlistAlbumSchema = new mongoose.Schema({
   title: String,
   thumb: String,
   price: Number,
-  dataAdded: String,
+  dateAdded: Number,
+  comment: String,
+  image: String,
+  artist: String,
 });
 
 const userSchema = new mongoose.Schema({
