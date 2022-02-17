@@ -35,7 +35,7 @@ const OrderHelpers = (() => {
 
   const _initialOrders = [
     {
-      orderDate: '04/02/2022',
+      orderDate: Date.now(),
       deliveryAddress: '123 Random Street',
       albums: [
         {
@@ -53,7 +53,7 @@ const OrderHelpers = (() => {
       ],
     },
     {
-      orderDate: '05/02/2022',
+      orderDate: Date.now(),
       deliveryAddress: '12 Random Street',
       albums: [
         {
@@ -69,7 +69,7 @@ const OrderHelpers = (() => {
           cover_image: 'picture_url4'
         },
       ],
-    } 
+    }
   ];
 
   const saveInitialOrders = async () => {
@@ -82,9 +82,33 @@ const OrderHelpers = (() => {
     return orders.map(order => order.toJSON());
   }
 
+  const createOrder = () => {
+    const newOrder = {
+      orderDate: Date.now(),
+      deliveryAddress: '05 Random Street',
+      albums: [
+        {
+          id: '2',
+          title: 'Album3',
+          price: 10.99,
+          cover_image: 'picture_url3'
+        },
+        {
+          id: '212',
+          title: 'Album4',
+          price: 9.99,
+          cover_image: 'picture_url4'
+        },
+      ],
+    }
+
+    return  newOrder;
+  }
+
   return {
     saveInitialOrders,
     ordersInDb,
+    createOrder,
   }
  })();
 
@@ -118,7 +142,8 @@ const OrderHelpers = (() => {
       title: 'new album',
       thumb: 'new album image',
       price: 11.99,
-      dateAdded: '10 March 2022',
+      dateAdded: Date.now(),
+      comment: '',
     }
 
     return album;
