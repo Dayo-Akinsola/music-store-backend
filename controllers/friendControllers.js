@@ -46,17 +46,17 @@ const FriendControllers = (() => {
 
       const targetUser = await User.findOne({ name: body.name, username: body.username });
       if (!targetUser) {
-        return res.status(400).json({ error: 'This user does not exists'});
+        return res.status(400).json({ error: 'This user does not exist.'});
       }
 
       if (_duplicateRequestFound(loggedInUser, body)) {
-        return res.status(400).json({ errror: 'You have already sent, received or are friends with this user.'})
+        return res.status(400).json({ error: 'You have already sent, received or are friends with this user.'})
       }
       loggedInUser.sentRequests.push(targetUser);
       targetUser.receivedRequests.push(loggedInUser);
       await loggedInUser.save();
       await targetUser.save();
-      res.json();
+      res.json({message: 'Your request has been sent.'});
     }
   }
 
@@ -90,7 +90,11 @@ const FriendControllers = (() => {
 
       await receiver.save();
       await sender.save();
-      res.status(200).json({ message: `You are now friends with ${sender.name}`});
+      if (body.accept) {
+        res.status(200).json({ message: `You are now friends with ${sender.name}.`});
+      } else {
+        res.status(200).json({ message: `Friend request has been declined.`})
+      }
     }
   }
 

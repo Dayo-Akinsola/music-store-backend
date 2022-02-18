@@ -7,5 +7,4 @@ reviewsRouter.put('/vote', (req, res) =>  ReviewControllers.reviewVote(req, res)
 
 reviewsRouter.get('/:albumId', (req, res) => ReviewControllers.getReviewsForAlbum(req, res));
 
-
 module.exports = reviewsRouter;
