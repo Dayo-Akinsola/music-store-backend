@@ -56,7 +56,7 @@ const UserControllers = (() => {
   
     const token = jwt.sign(userForToken, process.env.SECRET);
   
-    res.status(200).send({token, username: loggedInUser.username, name: loggedInUser.name});
+    res.status(200).send({token, username: loggedInUser.username, name: loggedInUser.name, id: loggedInUser._id});
   }
 
   const getUserDetails = async (req, res) => {
@@ -131,7 +131,7 @@ const UserControllers = (() => {
     res.json(loggedInUser.cart);
   }
 
-  const clearCart = async (req, res, next) => {
+  const clearCart = async (req, res) => {
     const loggedInUser = await _logInUser(req);
     loggedInUser.cart = [];
     await loggedInUser.save();
