@@ -3,18 +3,11 @@ const logInUser = require('./controllerHelper');
 
 const FriendControllers = (() => {
 
-  const _requestToSelfCheck = (loggedInUser, body) => {
-    if (loggedInUser.name !== body.name || loggedInUser.username !== body.username) {
-      return false;
-    }
-    return true;
-  }
-
-  const _duplicateRequestFound = (loggedInUser, body) => {
+  const _duplicateRequestFound = (loggedInUser, id) => {
     const { sentRequests, receivedRequests, friends } = loggedInUser;
 
     const duplicateFound = (userList) => {
-      const filteredUserlist  = userList.filter((user) => user.name === body.name && user.username === body.username);
+      const filteredUserlist  = userList.filter((user) => user._id.toString() === id);
       if (filteredUserlist.length === 0) {
         return false;
       }
@@ -38,25 +31,18 @@ const FriendControllers = (() => {
   const sendFriendRequest = async (req, res) => {
     const loggedInUser = await logInUser(req);
     const { body } = req;
-  
+    
     if (loggedInUser) {
-      if (_requestToSelfCheck(loggedInUser, body)) {
-        return res.status(400).json({ error: 'You cannot send a request to yourself.'});
-      }
-
-      const targetUser = await User.findOne({ name: body.name, username: body.username });
-      if (!targetUser) {
-        return res.status(400).json({ error: 'This user does not exist.'});
-      }
-
-      if (_duplicateRequestFound(loggedInUser, body)) {
+      const targetUser = await User.findById(body.id);
+      if (_duplicateRequestFound(loggedInUser, body.id)) {
         return res.status(400).json({ error: 'You have already sent, received or are friends with this user.'})
       }
+
       loggedInUser.sentRequests.push(targetUser);
       targetUser.receivedRequests.push(loggedInUser);
       await loggedInUser.save();
       await targetUser.save();
-      res.json({message: 'Your request has been sent.'});
+      res.json({message: `Your request to ${body.name} been sent.`});
     }
   }
 
@@ -98,10 +84,25 @@ const FriendControllers = (() => {
     }
   }
 
+  const getAllUnconnectedUsers = async (req, res) => {
+    const loggedInUser = await logInUser(req);
+    const users = await User.find({});
+    const filteredUsers = users.filter(user => !_duplicateRequestFound(loggedInUser, user._id.toString()));
+    const relevantUserDetails = filteredUsers.map(user => {
+      const details = {
+        name: user.name,
+        id: user._id,
+      }
+      return details;
+    });
+    res.json(relevantUserDetails);
+  }
+
   return {
     getUserList,
     sendFriendRequest,
     respondToFriendRequest,
+    getAllUnconnectedUsers,
   }
 })();
 
