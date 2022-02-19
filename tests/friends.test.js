@@ -17,12 +17,13 @@ describe('tests for sending a friend request', () => {
     const userLogin = await api.post('/users/login').send({ username: 'JD123', password: 'rabbit77'});
     const token = userLogin.body.token;
 
+    const friendUser = await User.findOne({ name: 'Wale'});
     const friendRequestInfo = {
-      name: 'Wale',
-      username: 'WE123',
+      name: friendUser.name,
+      id: friendUser._id,
     }
 
-    const result = await api
+    await api
       .post('/friends/request')
       .set('authorization', `bearer ${token}`)
       .send(friendRequestInfo)
@@ -34,45 +35,19 @@ describe('tests for sending a friend request', () => {
     expect(friend.receivedRequests).toHaveLength(1);
   });
 
-  test('user friend request should fail if the name and username do not match a user', async () => {
-    const userLogin = await api.post('/users/login').send({ username: 'JD123', password: 'rabbit77'});
-    const token = userLogin.body.token;
-
-    const wrongNameRequest = {
-      name: 'Johnny',
-      username: 'WE123',
-    }
-
-    const wrongUserNameRequest= {
-      name: 'Wale',
-      username: 'New1234',
-    }
-
-    await api
-      .post('/friends/request')
-      .set('authorization', `bearer ${token}`)
-      .send(wrongNameRequest)
-      .expect(400)
-    
-    await api
-    .post('/friends/request')
-    .set('authorization', `bearer ${token}`)
-    .send(wrongUserNameRequest)
-    .expect(400)  
-  });
-
   test('duplicate request should not be sent', async () => {
     const userLogin = await api.post('/users/login').send({ username: 'JD123', password: 'rabbit77'});
     const token = userLogin.body.token;
 
+    const friendUser = await User.findOne({ name: 'Wale'});
     const friendRequest = {
-      name: 'Wale',
-      username: 'WE123',
+      name: friendUser.name,
+      id: friendUser._id,
     }
 
     const dupeRequest = {
-      name: 'Wale',
-      username: 'WE123',
+      name: friendUser.name,
+      id: friendUser._id,
     }
 
     await api
@@ -100,9 +75,10 @@ describe('tests for responding to a friend request',  () => {
     const userLogin = await api.post('/users/login').send({ username: 'JD123', password: 'rabbit77'});
     const token = userLogin.body.token;
 
+    const friendUser = await User.findOne({ name: 'Wale'});
     const friendRequest = {
-      name: 'Wale',
-      username: 'WE123',
+      name: friendUser.name,
+      id: friendUser._id,
     }
 
     await api
@@ -131,9 +107,10 @@ describe('tests for responding to a friend request',  () => {
     const userLogin = await api.post('/users/login').send({ username: 'JD123', password: 'rabbit77'});
     const token = userLogin.body.token;
 
+    const friendUser = await User.findOne({ name: 'Wale'});
     const friendRequest = {
-      name: 'Wale',
-      username: 'WE123',
+      name: friendUser.name,
+      id: friendUser._id,
     }
 
     await api
@@ -169,10 +146,11 @@ describe('tests for view requests', () => {
   test('user should be able to view received requests',  async () => {
     const userLogin = await api.post('/users/login').send({ username: 'JD123', password: 'rabbit77'});
     const token = userLogin.body.token;
-  
+
+    const friendUser = await User.findOne({ name: 'Wale'});
     const friendRequest = {
-      name: 'Wale',
-      username: 'WE123',
+      name: friendUser.name,
+      id: friendUser._id,
     }
   
     await api
