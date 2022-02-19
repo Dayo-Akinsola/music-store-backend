@@ -11,4 +11,6 @@ friendsRouter.post('/request', (req, res) =>  FriendControllers.sendFriendReques
 
 friendsRouter.post('/request/response', (req, res) => FriendControllers.respondToFriendRequest(req, res));
 
+friendsRouter.get('/all', (req, res) => FriendControllers.getAllUnconnectedUsers(req, res));
+
 module.exports = friendsRouter;
