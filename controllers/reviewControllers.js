@@ -9,6 +9,11 @@ const ReviewControllers = (() => {
   
     if (token) {
       const loggedInUser = await getLoggedInUser(token);
+      const userReviewsPopulated = await loggedInUser.populate({ path: 'reviews', select: 'albumId'});
+      const reviewCheck = userReviewsPopulated.reviews.filter(review => review.albumId === body.albumId);
+      if (reviewCheck.length !== 0) {
+        return res.status(400).json({ error: 'You have already reviewed this album.'})
+      }
   
       const review = new Review({
         albumId: body.albumId,
@@ -20,12 +25,7 @@ const ReviewControllers = (() => {
         upvotes: 0,
         downvotes: 0,
       });
-  
-      const reviewCheck = loggedInUser.reviews.filter(review => review.albumId === body.albumId);
-      if (reviewCheck.length !== 0) {
-        return res.status(400).json({ error: 'User has already reviewed this album.'})
-      }
-  
+
       loggedInUser.reviews.push(review._id);
       await review.save();
       await loggedInUser.save();
