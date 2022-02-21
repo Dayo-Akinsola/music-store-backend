@@ -1,6 +1,5 @@
 const User = require('../models/user');
 const Order = require('../models/order');
-const Review = require('../models/review');
 const bcrypt = require('bcrypt');
 
 
@@ -114,7 +113,7 @@ const OrderHelpers = (() => {
 
  const ReviewHelpers = (() => {
   const generateReview = async (albumId, user) => {
-    const review = new Review({
+    const review = {
       albumId,
       user,
       rating: 5,
@@ -123,9 +122,8 @@ const OrderHelpers = (() => {
       date: '23 March 2022',
       upvotes: 0,
       downvotes: 0,
-    });
+    }
 
-    await review.save();
     return review;
   }
 
