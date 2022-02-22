@@ -1,14 +1,14 @@
 const Review = require('../models/review');
 const { getToken, getLoggedInUser } = require('../helpers/serviceHelpers');
+const logInUser = require('./controllerHelper');
 
 const ReviewControllers = (() => {
 
   const addAlbumReview = async (req, res) => {
     const { body } = req;
-    const token = getToken(req);
+    const loggedInUser = await logInUser(req);
   
-    if (token) {
-      const loggedInUser = await getLoggedInUser(token);
+    if (loggedInUser) {
       const userReviewsPopulated = await loggedInUser.populate({ path: 'reviews', select: 'albumId'});
       const reviewCheck = userReviewsPopulated.reviews.filter(review => review.albumId === body.albumId);
       if (reviewCheck.length !== 0) {
@@ -37,17 +37,17 @@ const ReviewControllers = (() => {
   }
 
   const getReviewsForAlbum = async (req, res) => {
-    const albumReviews = await Review.find({ albumId: req.params.albumId});
+    const albumReviews = await Review.find({ albumId: req.params.albumId})  
+      .populate({ path: 'user', select: 'name'});
     res.json(albumReviews);
   }
 
   const reviewVote = async (req, res) => {
     const { body } = req;
     const review = await Review.findOne({ _id: body.reviewId});
-    const token = getToken(req);
-  
-    if (token) {
-      const loggedInUser = await getLoggedInUser(token);
+    const loggedInUser = await logInUser(req);
+
+    if (loggedInUser) {
       let matchIndex;
       const reviewIdMatch = loggedInUser.votedReviews.filter((review, index) => {
         if (review.reviewId.toString() === body.reviewId) {
@@ -76,10 +76,29 @@ const ReviewControllers = (() => {
     }
   }
 
+  const getUsersAlbumReviews = async (req, res) => {
+    const loggedInUser = await logInUser(req);
+
+    if (loggedInUser) {
+      const userReviews = await Review.find({user: loggedInUser._id});
+      res.json(userReviews);
+    }
+  }
+
+  const getUsersVotedReviews = async (req, res) => {
+    const loggedInUser = await logInUser(req);
+
+    if (loggedInUser) {
+      res.json(loggedInUser.votedReviews);
+    }
+  }
+
   return {
     addAlbumReview,
     getReviewsForAlbum,
     reviewVote,
+    getUsersAlbumReviews,
+    getUsersVotedReviews,
   }
 })();
 
