@@ -2,11 +2,11 @@ const mongoose = require('mongoose');
 
 const reviewSchema = new mongoose.Schema({
   albumId: Number,
-  user: {type: mongoose.Schema.Types.ObjectId, ref: 'Order'},
+  user: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
   rating: Number,
   headline: String,
   reviewText: String,
-  date: String,
+  date: Number,
   upvotes: Number,
   downvotes: Number,
 });
