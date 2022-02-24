@@ -21,7 +21,7 @@ describe('tests for a user posting a review for an album', () => {
     const loggedInUser = await api.post('/users/login').send({ username: 'JD123', password: 'rabbit77'});
     const token = loggedInUser.body.token;
 
-    const review = await ReviewHelpers.generateReview(1234, user);
+    const review = ReviewHelpers.generateReview(1234, user);
 
     await api
       .post('/reviews')
@@ -39,7 +39,7 @@ describe('tests for a user posting a review for an album', () => {
     const loggedInUserTwo = await api.post('/users/login').send({ username: 'WE123', password: 'turtle77'});
     const tokenTwo = loggedInUserTwo.body.token;
 
-    const firstReview = await ReviewHelpers.generateReview(1, user);
+    const firstReview = ReviewHelpers.generateReview(1, user);
 
     await api
     .post('/reviews')
@@ -47,7 +47,7 @@ describe('tests for a user posting a review for an album', () => {
     .send(firstReview)
 
     for (let i = 0; i < 4; i++) {
-      const review = await ReviewHelpers.generateReview(i, userTwo);
+      const review = ReviewHelpers.generateReview(i, userTwo);
 
       await api
         .post('/reviews')
@@ -58,7 +58,7 @@ describe('tests for a user posting a review for an album', () => {
     const albumReview = await api
       .get('/reviews/1')
       .expect(200)
-    expect(albumReview.body[0].albumId).toBe(1);  
+    expect(albumReview.body[0].album.id).toBe(1);  
     expect(albumReview.body).toHaveLength(2);  
   });
 
@@ -67,14 +67,14 @@ describe('tests for a user posting a review for an album', () => {
     const loggedInUser = await api.post('/users/login').send({ username: 'JD123', password: 'rabbit77'});
     const token = loggedInUser.body.token;
 
-    const review = await ReviewHelpers.generateReview(1, user);
+    const review = ReviewHelpers.generateReview(1, user);
 
     await api
       .post('/reviews')
       .set('authorization', `bearer ${token}`)
       .send(review) 
     
-    const dupeReview = await ReviewHelpers.generateReview(1, user);
+    const dupeReview = ReviewHelpers.generateReview(1, user);
 
     const result = await api
       .post('/reviews')
@@ -85,12 +85,12 @@ describe('tests for a user posting a review for an album', () => {
     expect(result.body.error).toContain('You have already reviewed this album.')
   });
 
-  test.only("user should be able to upvote and downvote another user's review", async () => {
+  test("user should be able to upvote and downvote another user's review", async () => {
     const userOne = await UserHelpers.createUser('John', 'JD123', 'rabbit77');
     const userOneLogin = await api.post('/users/login').send({ username: 'JD123', password: 'rabbit77'});
     const tokenOne = userOneLogin.body.token;
 
-    const review = await ReviewHelpers.generateReview(1234, userOne);
+    const review = ReviewHelpers.generateReview(1234, userOne);
     const result = await api
     .post('/reviews')
     .set('authorization', `bearer ${tokenOne}`)
