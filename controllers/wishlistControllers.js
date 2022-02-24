@@ -2,16 +2,16 @@ const logInUser = require('./controllerHelper');
 
 const WishlistControllers = (() => {
 
-  const getUserWishlist = async (req, res) => {
-    const loggedInUser = await logInUser(req);
+  const getUserWishlist = async (req, res, next) => {
+    const loggedInUser = await logInUser(req, next);
     if (loggedInUser) {
       res.json(loggedInUser.wishlist);
     } 
   }
 
-  const addAlbumToWishlist = async (req, res) => {
+  const addAlbumToWishlist = async (req, res, next) => {
     const { body } = req;
-    const loggedInUser = await logInUser(req);
+    const loggedInUser = await logInUser(req, next);
   
     if (loggedInUser) {
       const dupeAlbumCheck = loggedInUser.wishlist.filter(album => album.albumId === body.albumId);
@@ -24,9 +24,9 @@ const WishlistControllers = (() => {
     }
   }
 
-  const removeAlbumFromWishlist = async (req, res) => {
+  const removeAlbumFromWishlist = async (req, res, next) => {
     const { body } = req
-    const loggedInUser = await logInUser(req);
+    const loggedInUser = await logInUser(req, next);
 
     if (loggedInUser) {
       loggedInUser.wishlist.forEach((album, index) => {
@@ -39,9 +39,9 @@ const WishlistControllers = (() => {
     }
   }
 
-  const updateWishlistAlbumComment = async (req, res) => {
+  const updateWishlistAlbumComment = async (req, res, next) => {
     const { body } = req;
-    const loggedInUser = await logInUser(req);
+    const loggedInUser = await logInUser(req, next);
 
     if (loggedInUser) {
       const { wishlist } = loggedInUser;
@@ -55,8 +55,8 @@ const WishlistControllers = (() => {
     res.end();
   }
 
-  const getWishlistAlbum = async (req, res) => {
-    const loggedInUser = await logInUser(req);
+  const getWishlistAlbum = async (req, res, next) => {
+    const loggedInUser = await logInUser(req, next);
 
     if (loggedInUser) {
       const { wishlist } = loggedInUser;
