@@ -1,22 +1,30 @@
 const Review = require('../models/review');
-const { getToken, getLoggedInUser } = require('../helpers/serviceHelpers');
 const logInUser = require('./controllerHelper');
 
 const ReviewControllers = (() => {
 
-  const addAlbumReview = async (req, res) => {
+  const addAlbumReview = async (req, res, next) => {
     const { body } = req;
-    const loggedInUser = await logInUser(req);
+    const loggedInUser = await logInUser(req, next);
   
     if (loggedInUser) {
-      const userReviewsPopulated = await loggedInUser.populate({ path: 'reviews', select: 'albumId'});
-      const reviewCheck = userReviewsPopulated.reviews.filter(review => review.albumId === body.albumId);
+      const userReviewsPopulated = await loggedInUser.populate({ path: 'reviews', select: 'album'});
+      const reviewCheck = userReviewsPopulated.reviews.filter(review => {
+        if (review.album.id === body.album.id) {
+          return true;
+        }
+        return false;
+      });
       if (reviewCheck.length !== 0) {
         return res.status(400).json({ error: 'You have already reviewed this album.'})
       }
   
       const review = new Review({
-        albumId: body.albumId,
+        album: {
+          id: body.album.id,
+          title: body.album.title,
+          thumb: body.album.thumb,
+        },
         user: loggedInUser._id,
         rating: body.rating,
         headline: body.headline,
@@ -37,15 +45,15 @@ const ReviewControllers = (() => {
   }
 
   const getReviewsForAlbum = async (req, res) => {
-    const albumReviews = await Review.find({ albumId: req.params.albumId})  
+    const albumReviews = await Review.find({ 'album.id': req.params.albumId})  
       .populate({ path: 'user', select: 'name'});
     res.json(albumReviews);
   }
 
-  const reviewVote = async (req, res) => {
+  const reviewVote = async (req, res, next) => {
     const { body } = req;
     const review = await Review.findOne({ _id: body.reviewId});
-    const loggedInUser = await logInUser(req);
+    const loggedInUser = await logInUser(req, next);
 
     if (loggedInUser) {
       let matchIndex;
@@ -76,8 +84,8 @@ const ReviewControllers = (() => {
     }
   }
 
-  const getUsersAlbumReviews = async (req, res) => {
-    const loggedInUser = await logInUser(req);
+  const getUsersAlbumReviews = async (req, res, next) => {
+    const loggedInUser = await logInUser(req, next);
 
     if (loggedInUser) {
       const userReviews = await Review.find({user: loggedInUser._id});
@@ -85,8 +93,8 @@ const ReviewControllers = (() => {
     }
   }
 
-  const getUsersVotedReviews = async (req, res) => {
-    const loggedInUser = await logInUser(req);
+  const getUsersVotedReviews = async (req, res, next) => {
+    const loggedInUser = await logInUser(req, next);
 
     if (loggedInUser) {
       res.json(loggedInUser.votedReviews);

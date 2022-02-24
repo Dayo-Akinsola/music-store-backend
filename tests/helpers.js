@@ -112,14 +112,18 @@ const OrderHelpers = (() => {
  })();
 
  const ReviewHelpers = (() => {
-  const generateReview = async (albumId, user) => {
+  const generateReview = (albumId, user) => {
     const review = {
-      albumId,
+      album: {
+        id: albumId,
+        title: 'AlbumTitle',
+        thumb: 'AlbumImage'
+      },
       user,
       rating: 5,
       headline: 'Great Album',
       reviewText: '10/10 would buy again.',
-      date: '23 March 2022',
+      date: Date.now(),
       upvotes: 0,
       downvotes: 0,
     }
@@ -134,7 +138,7 @@ const OrderHelpers = (() => {
 
  const WishlistHelpers = (() => {
 
-  const createWishlistAlbum = async (albumId) => {
+  const createWishlistAlbum = (albumId) => {
     const album = {
       albumId,
       title: 'new album',

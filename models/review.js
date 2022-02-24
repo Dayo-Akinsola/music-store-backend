@@ -1,7 +1,11 @@
 const mongoose = require('mongoose');
 
 const reviewSchema = new mongoose.Schema({
-  albumId: Number,
+  album: {
+    title: String,
+    thumb: String,
+    id: Number,
+  },
   user: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
   rating: Number,
   headline: String,
