@@ -138,6 +138,24 @@ const UserControllers = (() => {
     return res.status(204).json();
   }
 
+  const getUser = async (req, res) => {
+    const user = await User.findOne({ _id: req.params.id})
+      .populate({ path: 'friends', select: 'name username'})
+      .populate({ path: 'votedReviews', select: 'reviewId'})
+      .populate({ path: 'reviews'});
+    
+    const dataToSend = {
+      name: user.name,
+      reviews: user.reviews,
+      friends: user.friends,
+      votedReviews: user.votedReviews,
+      wishlist: user.wishlist,
+      id: user._id,
+    }
+    console.log(dataToSend.reviews);
+    res.json(dataToSend);
+  }
+
 
   return {
     registerUser,
@@ -148,6 +166,7 @@ const UserControllers = (() => {
     updateCart,
     deleteCartAlbum,
     clearCart,
+    getUser,
   }
 
 })();
