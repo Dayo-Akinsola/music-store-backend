@@ -20,16 +20,16 @@ const FriendControllers = (() => {
     return false;
   }
   
-  const getUserList = async (req, res, list) => {
-    const loggedInUser = await logInUser(req);
+  const getUserList = async (req, res, next, list) => {
+    const loggedInUser = await logInUser(req, next);
 
     if (loggedInUser) {
       res.json(loggedInUser[list])
     }
   }
 
-  const sendFriendRequest = async (req, res) => {
-    const loggedInUser = await logInUser(req);
+  const sendFriendRequest = async (req, res, next) => {
+    const loggedInUser = await logInUser(req, next);
     const { body } = req;
     
     if (loggedInUser) {
@@ -46,8 +46,8 @@ const FriendControllers = (() => {
     }
   }
 
-  const respondToFriendRequest = async (req, res) => {
-    const loggedInUser = await logInUser(req);
+  const respondToFriendRequest = async (req, res, next) => {
+    const loggedInUser = await logInUser(req, next);
     const { body } = req;
 
     if (loggedInUser) {
@@ -84,8 +84,8 @@ const FriendControllers = (() => {
     }
   }
 
-  const getAllUnconnectedUsers = async (req, res) => {
-    const loggedInUser = await logInUser(req);
+  const getAllUnconnectedUsers = async (req, res, next) => {
+    const loggedInUser = await logInUser(req, next);
     const users = await User.find({});
     const filteredUsers = users.filter(user => !_duplicateRequestFound(loggedInUser, user._id.toString()));
     const relevantUserDetails = filteredUsers.map(user => {

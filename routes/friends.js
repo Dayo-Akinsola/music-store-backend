@@ -1,16 +1,16 @@
 const friendsRouter = require('express').Router();
 const FriendControllers = require('../controllers/friendControllers');
 
-friendsRouter.get('/friendlist', (req, res) => FriendControllers.getUserList(req, res, 'friends'));
+friendsRouter.get('/friendlist', (req, res, next) => FriendControllers.getUserList(req, res, next, 'friends'));
 
-friendsRouter.get('/request/sent', (req, res) => FriendControllers.getUserList(req, res, 'sentRequests'));
+friendsRouter.get('/request/sent', (req, res, next) => FriendControllers.getUserList(req, res, next, 'sentRequests'));
 
-friendsRouter.get('/request/received', (req, res) => FriendControllers.getUserList(req, res, 'receivedRequests'));
+friendsRouter.get('/request/received', (req, res, next) => FriendControllers.getUserList(req, res, next, 'receivedRequests'));
 
-friendsRouter.post('/request', (req, res) =>  FriendControllers.sendFriendRequest(req, res));
+friendsRouter.post('/request', (req, res, next) =>  FriendControllers.sendFriendRequest(req, res, next));
 
-friendsRouter.post('/request/response', (req, res) => FriendControllers.respondToFriendRequest(req, res));
+friendsRouter.post('/request/response', (req, res, next) => FriendControllers.respondToFriendRequest(req, res, next));
 
-friendsRouter.get('/all', (req, res) => FriendControllers.getAllUnconnectedUsers(req, res));
+friendsRouter.get('/all', (req, res, next) => FriendControllers.getAllUnconnectedUsers(req, res, next));
 
 module.exports = friendsRouter;
