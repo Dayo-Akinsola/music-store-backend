@@ -6,4 +6,13 @@ const logInUser = async (req, next) => {
   return loggedInUser;
 }
 
-module.exports = logInUser;
+const isUserLoggedIn = (req) => {
+  const token = getToken(req);
+  if (token) {
+    return true;
+  }
+  return false;
+}
+
+
+module.exports = { logInUser, isUserLoggedIn };
