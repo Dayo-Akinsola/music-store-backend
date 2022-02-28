@@ -7,7 +7,7 @@ const getToken = (req) => {
   if (auth && auth.toLowerCase().startsWith('bearer ')) {
     return auth.substring(7);
   }
-  return null
+  return null;
 }
 
 const getLoggedInUser = async (token, next) => {

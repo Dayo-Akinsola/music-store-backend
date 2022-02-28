@@ -1,5 +1,5 @@
 const Review = require('../models/review');
-const logInUser = require('./controllerHelper');
+const { logInUser, isUserLoggedIn } = require('./controllerHelpers');
 
 const ReviewControllers = (() => {
 
@@ -53,6 +53,10 @@ const ReviewControllers = (() => {
   const reviewVote = async (req, res, next) => {
     const { body } = req;
     const review = await Review.findOne({ _id: body.reviewId});
+    if (!isUserLoggedIn(req)) { 
+      return res.status(400).json({ error: 'You must be logged in to vote.'});
+    }
+    
     const loggedInUser = await logInUser(req, next);
 
     if (loggedInUser) {
@@ -79,8 +83,6 @@ const ReviewControllers = (() => {
       await review.save();
       await loggedInUser.save();
       res.json(review);
-    } else {
-      return res.status(400).json({ error: 'You must be logged in to vote.'});
     }
   }
 
@@ -94,11 +96,16 @@ const ReviewControllers = (() => {
   }
 
   const getUsersVotedReviews = async (req, res, next) => {
-    const loggedInUser = await logInUser(req, next);
+    if (isUserLoggedIn(req)) {
+      const loggedInUser = await logInUser(req, next);
 
-    if (loggedInUser) {
-      res.json(loggedInUser.votedReviews);
+      if (loggedInUser) {
+        res.json(loggedInUser.votedReviews);
+      }
+    } else {
+      res.json([]);
     }
+ 
   }
 
   return {

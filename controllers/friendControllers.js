@@ -1,5 +1,5 @@
 const User = require('../models/user');
-const logInUser = require('./controllerHelper');
+const { logInUser } = require('./controllerHelpers');
 
 const FriendControllers = (() => {
 
