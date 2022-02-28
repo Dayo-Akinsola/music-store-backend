@@ -204,6 +204,39 @@ describe('tests for a user controlling their cart', () => {
     })
 });
 
+describe('tests for confirming if a user is logged in', () => {
+  beforeEach(async () => {
+    await User.deleteMany({});
+    await UserHelpers.createUser('John', 'JD123', 'rabbit77');
+  });
+
+  test('should be able to get details of a logged in user', async () => {
+      const loggedInUser = await api.post('/users/login').send({ username: 'JD123', password: 'rabbit77'});
+      const token = loggedInUser.body.token;
+
+      const result = await api
+        .get('/users/details')
+        .set('authorization', `bearer ${token}`)
+        .expect(200)
+      expect(result.body.firstName).toBe('');
+  });
+
+  test('no token in the authorization header should return null', async () => {
+    const result = await api
+      .get('/users/details')
+      .expect(401)
+    expect(result.body).toBe(null);
+  });
+
+  test('invalid token in the authorization header should return null', async () => {
+    const result = await api
+      .get('/users/details')
+      .set('authorization', `bearer invalid-token`)
+      .expect(401)
+    expect(result.body.error).toContain('invalid token');
+  });
+})
+
 afterAll(() => {
   mongoose.connection.close();
 });
