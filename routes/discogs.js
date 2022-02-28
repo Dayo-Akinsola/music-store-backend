@@ -43,7 +43,6 @@ discogsRouter.get('/:type/:id', async (req, res) => {
     withCrendentials: true,
   }
   const data = await cache.get(requestUrl, headers);
-  console.log(data);
   res.cookie(requestUrl, data, { sameSite: 'none'});
   res.json(data);
 });

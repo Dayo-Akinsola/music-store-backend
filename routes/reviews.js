@@ -9,7 +9,6 @@ reviewsRouter.get('/userReviews', (req, res, next) => ReviewControllers.getUsers
 
 reviewsRouter.get('/votedReviews', (req, res, next) => ReviewControllers.getUsersVotedReviews(req, res, next));
 
-
 reviewsRouter.get('/:albumId', (req, res) => ReviewControllers.getReviewsForAlbum(req, res));
 
 module.exports = reviewsRouter;
