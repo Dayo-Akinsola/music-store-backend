@@ -1,4 +1,4 @@
-const logInUser = require('./controllerHelper');
+const { logInUser, isUserLoggedIn } = require('./controllerHelpers');
 
 const WishlistControllers = (() => {
 
@@ -11,8 +11,13 @@ const WishlistControllers = (() => {
 
   const addAlbumToWishlist = async (req, res, next) => {
     const { body } = req;
+
+    if (!isUserLoggedIn(req)) {
+      return res.status(401).json({error: 'You must be logged in to access your wishlist.'})
+    }
+    
     const loggedInUser = await logInUser(req, next);
-  
+
     if (loggedInUser) {
       const dupeAlbumCheck = loggedInUser.wishlist.filter(album => album.albumId === body.albumId);
       if (dupeAlbumCheck.length !== 0){
