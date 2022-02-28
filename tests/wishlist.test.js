@@ -16,7 +16,7 @@ describe("tests for a user adding and removing items from their wishlist", () =>
   test("A user should be able to add and remove an album from their wishlist", async () => {
     const userLogin = await api.post('/users/login').send({ username: 'JD123', password: 'rabbit77'});
     const token = userLogin.body.token;
-    const wishListAlbum = await WishlistHelpers.createWishlistAlbum(123);
+    const wishListAlbum = WishlistHelpers.createWishlistAlbum(123);
 
     let wishlist = await api
       .post('/wishlist')
@@ -34,7 +34,7 @@ describe("tests for a user adding and removing items from their wishlist", () =>
   test("user should be able to get contents of their wishlist", async () => {
     const userLogin = await api.post('/users/login').send({ username: 'JD123', password: 'rabbit77'});
     const token = userLogin.body.token;
-    const wishListAlbum = await WishlistHelpers.createWishlistAlbum(123);
+    const wishListAlbum = WishlistHelpers.createWishlistAlbum(123);
 
     await api
       .post('/wishlist')
@@ -54,7 +54,7 @@ describe("tests for a user adding and removing items from their wishlist", () =>
   test("A user should be able to update a comment in their wishlist", async () => {
     const userLogin = await api.post('/users/login').send({ username: 'JD123', password: 'rabbit77'});
     const token = userLogin.body.token;
-    const wishListAlbum = await WishlistHelpers.createWishlistAlbum(123);
+    const wishListAlbum = WishlistHelpers.createWishlistAlbum(123);
 
 
     await api
@@ -80,7 +80,7 @@ describe("tests for a user adding and removing items from their wishlist", () =>
   test("User should be able to get a specific album from their wishlist", async () => {
     const userLogin = await api.post('/users/login').send({ username: 'JD123', password: 'rabbit77'});
     const token = userLogin.body.token;
-    const wishListAlbum = await WishlistHelpers.createWishlistAlbum(123);
+    const wishListAlbum = WishlistHelpers.createWishlistAlbum(123);
 
     await api
       .post('/wishlist')
