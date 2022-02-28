@@ -3,15 +3,9 @@ const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 dotenv.config();
 const User = require('../models/user');
-const { getToken, getLoggedInUser } = require('../helpers/serviceHelpers');
+const { isUserLoggedIn , logInUser }  = require('./controllerHelpers');
 
 const UserControllers = (() => {
-
-  const _logInUser = async (req) => {
-    const token = getToken(req);
-    const loggedInUser = await getLoggedInUser(token);
-    return loggedInUser;
-  }
 
   const registerUser = async (req, res, next) => {
     const { body } = req;
@@ -39,7 +33,7 @@ const UserControllers = (() => {
     }
   }
 
-  const loginUser = async (req, res) => {
+  const userLogin = async (req, res) => {
     const { body } = req;
     const loggedInUser = await User.findOne({ username: body.username });
     const passwordCorrect = (loggedInUser === null) ? false : await bcrypt.compare(body.password, loggedInUser.passwordHash);
@@ -59,16 +53,21 @@ const UserControllers = (() => {
     res.status(200).send({token, username: loggedInUser.username, name: loggedInUser.name, id: loggedInUser._id});
   }
 
-  const getUserDetails = async (req, res) => {
-    const loggedInUser = await _logInUser(req);
-    if (loggedInUser) {
-      res.json(loggedInUser.details);
+  const getUserDetails = async (req, res, next) => {
+    if (!isUserLoggedIn(req)) {
+      res.status(401).json(null);
     } else {
-      res.send(null);
+      const loggedInUser = await logInUser(req, next);
+      if (loggedInUser) {
+        res.json(loggedInUser.details);
+      }
     }
   }
 
-  const updateUserDetails = async (req, res) => {
+  const updateUserDetails = async (req, res, next) => {
+    if (!isUserLoggedIn(req)) {
+      res.end();
+    }
     const { body } = req;
     const userDetails = {
       firstName: body.firstName,
@@ -79,15 +78,17 @@ const UserControllers = (() => {
       phone: body.phone,
       email: body.email,
     }
-  
-    const loggedInUser = await _logInUser(req);
-    loggedInUser.details = userDetails;
-    await loggedInUser.save();
-    res.json();
+    
+    const loggedInUser = await logInUser(req, next);
+    if (loggedInUser) {
+      loggedInUser.details = userDetails;
+      await loggedInUser.save();
+      res.json();
+    }
   }
 
   const getCartAlbums = async (req, res, next) => {
-    const loggedInUser =  await _logInUser(req);
+    const loggedInUser =  await logInUser(req, next);
     res.json(loggedInUser.cart);
   }
 
@@ -102,7 +103,7 @@ const UserControllers = (() => {
       quantity: body.quantity,
     }
   
-    const loggedInUser = await _logInUser(req);
+    const loggedInUser = await logInUser(req, next);
     let albumIndex;
     const matchingAlbum = loggedInUser.cart.filter((album, index) => {
       if (album.id === body.id) {
@@ -124,18 +125,24 @@ const UserControllers = (() => {
 
   const deleteCartAlbum = async (req, res, next) => {
     const id = req.body.id;
-    const loggedInUser = await _logInUser(req);
+    const loggedInUser = await logInUser(req, next);
     const albumToDeleteIndex = loggedInUser.cart.findIndex(album => album.id === id);
     loggedInUser.cart.splice(albumToDeleteIndex, 1);
     await loggedInUser.save();
     res.json(loggedInUser.cart);
   }
 
-  const clearCart = async (req, res) => {
-    const loggedInUser = await _logInUser(req);
-    loggedInUser.cart = [];
-    await loggedInUser.save();
-    return res.status(204).json();
+  const clearCart = async (req, res, next) => {
+
+    if (isUserLoggedIn(req)) {
+      const loggedInUser = await logInUser(req, next);
+
+      if (loggedInUser) {
+        loggedInUser.cart = [];
+        await loggedInUser.save();
+      }
+    }
+    return res.status(204).json({});
   }
 
   const getUser = async (req, res) => {
@@ -152,14 +159,13 @@ const UserControllers = (() => {
       wishlist: user.wishlist,
       id: user._id,
     }
-    console.log(dataToSend.reviews);
     res.json(dataToSend);
   }
 
 
   return {
     registerUser,
-    loginUser,
+    userLogin,
     getUserDetails,
     updateUserDetails,
     getCartAlbums,
