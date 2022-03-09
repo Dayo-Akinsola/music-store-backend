@@ -1,5 +1,6 @@
 const Review = require('../models/review');
-const { logInUser, isUserLoggedIn } = require('./controllerHelpers');
+const User = require('../models/user');
+const { logInUser, isUserLoggedIn, findMatchingAlbum } = require('./controllerHelpers');
 
 const ReviewControllers = (() => {
 
@@ -105,7 +106,21 @@ const ReviewControllers = (() => {
     } else {
       res.json([]);
     }
- 
+  }
+
+  const replaceAlbumReviewThumb = async (req, res) => {
+    const { reviewId, userId } = req.body;
+    
+    const user = await User.findById(userId)
+      .populate({ path: 'reviews', select: 'album'});
+    const reviewToUpdate = await Review.findById(reviewId);
+    const review = user.reviews.filter(review => review.id.toString() === reviewId);
+    const matchingAlbum = await findMatchingAlbum(review[0].album.id);
+    review[0].album.thumb = matchingAlbum.thumb;
+    reviewToUpdate.album.thumb = matchingAlbum.thumb;
+    await user.save();
+    await reviewToUpdate.save();
+    res.json(matchingAlbum.thumb);
   }
 
   return {
@@ -114,6 +129,7 @@ const ReviewControllers = (() => {
     reviewVote,
     getUsersAlbumReviews,
     getUsersVotedReviews,
+    replaceAlbumReviewThumb,
   }
 })();
 

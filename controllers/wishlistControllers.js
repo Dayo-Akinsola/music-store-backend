@@ -1,4 +1,5 @@
-const { logInUser, isUserLoggedIn } = require('./controllerHelpers');
+const { logInUser, isUserLoggedIn, findMatchingAlbum } = require('./controllerHelpers');
+const User = require('../models/user');
 
 const WishlistControllers = (() => {
 
@@ -70,12 +71,33 @@ const WishlistControllers = (() => {
     }
   }
 
+  const replaceWishlistAlbumImage = async (req, res) => {
+    const { userId, albumId } = req.body;
+    const viewedUser = await User.findById(userId);
+    const matchingAlbum = await findMatchingAlbum(albumId);
+    if (matchingAlbum) {
+      viewedUser.wishlist.forEach((album) => {
+        if (album.albumId === matchingAlbum.id) {
+          album.image = matchingAlbum.cover_image;
+          album.thumb = matchingAlbum.thumb;
+        }
+      });
+      await viewedUser.save();
+      res.json(matchingAlbum.cover_image);
+    } else {
+      res.status(400).json({ error: 'Album cannot be found'});
+    }
+   
+
+  }
+
   return {
     getUserWishlist,
     addAlbumToWishlist,
     removeAlbumFromWishlist,
     updateWishlistAlbumComment,
     getWishlistAlbum,
+    replaceWishlistAlbumImage,
   }
 
 })();

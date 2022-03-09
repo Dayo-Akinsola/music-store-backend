@@ -11,4 +11,6 @@ reviewsRouter.get('/votedReviews', (req, res, next) => ReviewControllers.getUser
 
 reviewsRouter.get('/:albumId', (req, res) => ReviewControllers.getReviewsForAlbum(req, res));
 
+reviewsRouter.put('/thumb', (req, res) => ReviewControllers.replaceAlbumReviewThumb(req, res));
+
 module.exports = reviewsRouter;

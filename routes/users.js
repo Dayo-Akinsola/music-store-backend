@@ -19,5 +19,7 @@ usersRouter.delete('/cart/clear', (req, res, next) => UserControllers.clearCart(
 
 usersRouter.get('/user/:id', (req, res) => UserControllers.getUser(req, res));
 
+usersRouter.put('/cart/thumb', (req, res, next) => UserControllers.replaceAlbumThumb(req, res, next));
+
 module.exports = usersRouter;
 

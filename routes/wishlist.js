@@ -11,4 +11,6 @@ wishlistRouter.put('/', (req, res, next) => WishlistControllers.updateWishlistAl
 
 wishlistRouter.get('/:id', (req, res, next) => WishlistControllers.getWishlistAlbum(req, res, next));
 
+wishlistRouter.put('/image', (req, res) => WishlistControllers.replaceWishlistAlbumImage(req, res));
+
 module.exports = wishlistRouter;

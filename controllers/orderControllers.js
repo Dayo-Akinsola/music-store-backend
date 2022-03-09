@@ -1,5 +1,5 @@
 const Order = require('../models/order');
-const { isUserLoggedIn, logInUser } = require('./controllerHelpers');
+const { isUserLoggedIn, logInUser, findMatchingAlbum } = require('./controllerHelpers');
 
 const OrderControllers = (() => {
 
@@ -46,10 +46,35 @@ const OrderControllers = (() => {
     res.json(order);
   }
 
+  const replaceOrderAlbumThumb = async (req, res, next) => {
+    const { albumId, orderId } = req.body;
+    const loggedInUser = await logInUser(req, next);
+    const loggedInUserPopulated =  await loggedInUser.populate({ path: 'orders', select: 'albums'});
+    const matchingAlbum = await findMatchingAlbum(albumId);
+    const userOrder = loggedInUserPopulated.orders.filter(order => order._id.toString() === orderId);
+    userOrder[0].albums.forEach(album => {
+      if (album.id === albumId) {
+        album.thumb = matchingAlbum.thumb;
+      }
+    });
+
+    const order = await Order.findById(orderId);
+    order.albums.forEach(album => {
+      if (album.id === albumId) {
+        album.thumb = matchingAlbum.thumb;
+      }
+    });
+
+    await loggedInUserPopulated.save();
+    await order.save();
+    res.json(matchingAlbum.thumb);
+  }
+
   return {
     addOrder,
     getOrders,
     getOrder,
+    replaceOrderAlbumThumb,
   }
 })();
 

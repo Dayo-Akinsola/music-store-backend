@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 dotenv.config();
 const User = require('../models/user');
-const { isUserLoggedIn , logInUser }  = require('./controllerHelpers');
+const { isUserLoggedIn , logInUser, findMatchingAlbum }  = require('./controllerHelpers');
 
 const UserControllers = (() => {
 
@@ -89,7 +89,23 @@ const UserControllers = (() => {
 
   const getCartAlbums = async (req, res, next) => {
     const loggedInUser =  await logInUser(req, next);
-    res.json(loggedInUser.cart);
+    const { cart } = loggedInUser;
+    res.json(cart);
+  }
+
+  const replaceAlbumThumb = async (req, res, next) => {
+    const loggedInUser = await logInUser(req, next);
+    const { albumId } = req.body;
+
+    const matchingAlbum = await findMatchingAlbum(albumId);
+   
+    loggedInUser.cart.forEach((album) => {
+      if (album.id === albumId) {
+        album.thumb = matchingAlbum.thumb;
+      }
+    });
+    await loggedInUser.save();
+    res.json(matchingAlbum.thumb);
   }
 
   const updateCart = async (req, res, next) => {
@@ -173,6 +189,7 @@ const UserControllers = (() => {
     deleteCartAlbum,
     clearCart,
     getUser,
+    replaceAlbumThumb
   }
 
 })();

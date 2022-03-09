@@ -7,4 +7,6 @@ ordersRouter.get('/', (req, res, next) => OrderControllers.getOrders(req, res, n
 
 ordersRouter.get('/:orderTime', (req, res) => OrderControllers.getOrder(req, res));
 
+ordersRouter.put('/thumb', (req, res, next) => OrderControllers.replaceOrderAlbumThumb(req, res, next));
+
 module.exports = ordersRouter;
