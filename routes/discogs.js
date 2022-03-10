@@ -37,7 +37,6 @@ discogsRouter.get('/jazz', async (req, res) => {
 });
 
 discogsRouter.get('/:type/:id', async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
   const requestUrl = `https://api.discogs.com/${req.params.type}/${req.params.id}`;
   const headers = {
     withCrendentials: true,

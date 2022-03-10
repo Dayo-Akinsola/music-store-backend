@@ -22,7 +22,6 @@ const authOptions = {
 };
 
 spotifyRouter.get('/:albumID/tracks', async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
   const { access_token } = await cache.getAccessToken('access_token', authOptions);
   const headers = {
       'Authorization' : `Bearer ${access_token}`,
@@ -33,7 +32,6 @@ spotifyRouter.get('/:albumID/tracks', async (req, res) => {
 });
 
 spotifyRouter.get('/:albumName', async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
   const { access_token } = await cache.getAccessToken('access_token', authOptions);
   const headers = {
       'Authorization' : `Bearer ${access_token}`,
