@@ -12,7 +12,6 @@ discogsRouter.get('/pop', async (req, res) => {
     withCrendentials: true,
   }
   const data = await cache.get(requestUrl, headers);
-  res.cookie(requestUrl, data, { sameSite: 'none'});
   res.json(data);
 });
 
@@ -22,7 +21,6 @@ discogsRouter.get('/hiphop', async (req, res) => {
     withCrendentials: true,
   }
   const data = await cache.get(requestUrl, headers);
-  res.cookie(requestUrl, data, { sameSite: 'none'});
   res.json(data);
 });
 
@@ -32,7 +30,6 @@ discogsRouter.get('/jazz', async (req, res) => {
     withCrendentials: true,
   }
   const data = await cache.get(requestUrl, headers);
-  res.cookie(requestUrl, data, { sameSite: 'none'});
   res.json(data);
 });
 
@@ -42,7 +39,6 @@ discogsRouter.get('/:type/:id', async (req, res) => {
     withCrendentials: true,
   }
   const data = await cache.get(requestUrl, headers);
-  res.cookie(requestUrl, data, { sameSite: 'none'});
   res.json(data);
 });
 
